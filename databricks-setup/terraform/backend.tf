@@ -25,6 +25,6 @@ provider "azurerm" {
 }
 
 provider "databricks" {
-  azure_workspace_resource_id = azurerm_databricks_workspace.main.id
-  token                       = var.databricks_azure_token
+  host  = "https://${azurerm_databricks_workspace.main.workspace_url}"
+  token = var.databricks_azure_token
 }
