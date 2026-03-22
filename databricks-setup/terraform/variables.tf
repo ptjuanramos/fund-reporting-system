@@ -21,3 +21,9 @@ variable "environment" {
   type        = string
   default     = "dev"
 }
+
+variable "databricks_azure_token" {
+  description = "Azure AD access token scoped to the Databricks resource"
+  type      = string
+  sensitive = true
+}

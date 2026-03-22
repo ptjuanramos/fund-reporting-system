@@ -23,3 +23,8 @@ provider "azurerm" {
 
   use_oidc = true
 }
+
+provider "databricks" {
+  azure_workspace_resource_id = azurerm_databricks_workspace.main.id
+  token                       = var.databricks_azure_token
+}

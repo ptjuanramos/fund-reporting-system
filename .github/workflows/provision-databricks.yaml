@@ -89,14 +89,23 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform validate
 
+      - name: Get Databricks Azure AD token
+        id: dbtoken
+        run: |
+          RESOURCE=$(az ad sp list --display-name "AzureDatabricks" --query "[0].appId" -o tsv)
+          TOKEN=$(az account get-access-token --resource "$RESOURCE" --query accessToken -o tsv)
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+
       - name: Terraform Apply
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform apply -auto-approve
         env:
-          TF_VAR_location:               "northeurope"
-          TF_VAR_environment:            "dev"
-          TF_VAR_workspace_name:      "fund-reporting-dbw"
-          TF_VAR_project_name:        "fund-reporting"
+          TF_VAR_location:                  "northeurope"
+          TF_VAR_environment:               "dev"
+          TF_VAR_workspace_name:            "fund-reporting-dbw"
+          TF_VAR_project_name:              "fund-reporting"
+          TF_VAR_databricks_azure_token:    ${{ steps.dbtoken.outputs.token }}
 
       - name: Show workspace URL
         working-directory: ${{ env.TF_WORKING_DIR }}
