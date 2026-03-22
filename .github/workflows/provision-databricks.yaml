@@ -1,15 +1,13 @@
 name: Provision — Databricks
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "databricks-setup/**"
-  pull_request:
-    branches: [main]
-    paths:
-      - "databricks-setup/**"
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'databricks-setup/**''
+      - '.github/workflows/provision-databricks.yaml'
 
 permissions:
   contents: read
@@ -22,6 +20,7 @@ jobs:
   preflight:
     name: Validate prerequisites
     runs-on: ubuntu-latest
+    environment: dev
 
     steps:
       - name: Checkout
