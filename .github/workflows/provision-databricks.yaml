@@ -15,6 +15,8 @@ permissions:
 
 env:
   TF_WORKING_DIR: databricks-setup/terraform
+  TF_VAR_resource_group_name: "fund-reporting-rg"
+  TF_VAR_tf_state_storage_account_name: "fundreportingstracc"
 
 jobs:
   preflight:
@@ -35,8 +37,8 @@ jobs:
 
       - name: Validate resource group exists
         run: |
-          if ! az group show --name fund-admin-poc-rg &>/dev/null; then
-            echo "::error::Resource group 'fund-admin-poc-rg' not found."
+          if ! az group show --name "$TF_VAR_resource_group_name" &>/dev/null; then
+            echo "::error::Resource group '$TF_VAR_resource_group_name' not found."
             echo "::error::Run the 'Cold Start — Base Infrastructure' workflow first."
             exit 1
           fi
@@ -45,9 +47,9 @@ jobs:
       - name: Validate Terraform state storage account exists
         run: |
           if ! az storage account show \
-               --name fundadminpocstracc \
-               --resource-group fund-admin-poc-rg &>/dev/null; then
-            echo "::error::Storage account 'fundadminpocstracc' not found."
+               --name "$TF_VAR_tf_state_storage_account_name" \
+               --resource-group "$TF_VAR_resource_group_name" &>/dev/null; then
+            echo "::error::Storage account '$TF_VAR_tf_state_storage_account_name' not found."
             echo "::error::Run the 'Cold Start — Base Infrastructure' workflow first."
             exit 1
           fi
@@ -90,8 +92,6 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform apply -auto-approve
         env:
-          TF_VAR_resource_group_name: "fund-reporting-rg"
-          TF_VAR_tf_state_storage_account_name: "fundreportingstracc"
           TF_VAR_location:               "northeurope"
           TF_VAR_environment:            "dev"
           TF_VAR_workspace_name:      "fund-reporting-dbw"
