@@ -28,6 +28,11 @@ variable "databricks_azure_token" {
   default   = ""
 }
 
+variable "admin_user_email" {
+  description = "Email of the human user to add as workspace admin."
+  type        = string
+}
+
 variable "arm_client_id" {
   type      = string
   sensitive = true

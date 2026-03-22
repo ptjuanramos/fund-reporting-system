@@ -35,6 +35,19 @@ resource "databricks_cluster_policy" "cost_control" {
   })
 }
 
+data "databricks_group" "admins" {
+  display_name = "admins"
+}
+
+resource "databricks_user" "admin" {
+  user_name = var.admin_user_email
+}
+
+resource "databricks_group_member" "admin" {
+  group_id  = data.databricks_group.admins.id
+  member_id = databricks_user.admin.id
+}
+
 locals {
   common_tags = {
     project     = var.project-name

@@ -118,6 +118,7 @@ jobs:
           TF_VAR_workspace_name:         "fund-reporting-dbw"
           TF_VAR_project_name:           "fund-reporting"
           TF_VAR_databricks_azure_token: ${{ steps.dbtoken.outputs.token }}
+          TF_VAR_admin_user_email:       ${{ vars.DATABRICKS_ADMIN_EMAIL }}
 
       - name: Show workspace URL
         working-directory: ${{ env.TF_WORKING_DIR }}
