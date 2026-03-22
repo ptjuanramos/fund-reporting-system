@@ -59,8 +59,7 @@ jobs:
     name: Terraform Plan
     runs-on: ubuntu-latest
     needs: preflight
-    outputs:
-      has_changes: ${{ steps.plan.outputs.exit_code == '2' }}
+    environment: dev
 
     steps:
       - name: Checkout
