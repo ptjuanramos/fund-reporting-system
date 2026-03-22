@@ -1,0 +1,32 @@
+-- ============================================================
+-- 00_create_user.sql
+-- Purpose : Create the fund_admin schema user inside FREEPDB1
+-- Run as  : sys as sysdba  (via FREE CDB, then switch container)
+-- Called  : automatically by setup_oracle_fund_db.sh
+-- ============================================================
+WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+-- Switch into the pluggable DB
+ALTER SESSION SET CONTAINER = FREEPDB1;
+
+-- Drop cleanly if a previous run left it behind
+DECLARE
+  v_count NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_count FROM dba_users WHERE username = 'FUND_ADMIN';
+  IF v_count > 0 THEN
+    EXECUTE IMMEDIATE 'DROP USER fund_admin CASCADE';
+    DBMS_OUTPUT.PUT_LINE('Dropped existing fund_admin.');
+  END IF;
+END;
+/
+
+CREATE USER fund_admin IDENTIFIED BY "FundAdmin#2024"
+  DEFAULT TABLESPACE   USERS
+  TEMPORARY TABLESPACE TEMP
+  QUOTA UNLIMITED ON   USERS;
+
+GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE SEQUENCE TO fund_admin;
+GRANT CREATE SESSION TO fund_admin;
+
+EXIT 0;
