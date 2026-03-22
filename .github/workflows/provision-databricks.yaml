@@ -92,8 +92,7 @@ jobs:
       - name: Get Databricks Azure AD token
         id: dbtoken
         run: |
-          RESOURCE=$(az ad sp list --display-name "AzureDatabricks" --query "[0].appId" -o tsv)
-          TOKEN=$(az account get-access-token --resource "$RESOURCE" --query accessToken -o tsv)
+          TOKEN=$(az account get-access-token --resource "2ff814a6-3304-4ab8-85cb-cd0e6f879c1d" --query accessToken -o tsv)
           echo "::add-mask::$TOKEN"
           echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
 
