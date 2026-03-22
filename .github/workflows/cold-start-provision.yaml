@@ -20,6 +20,7 @@ jobs:
   cold-start:
     name: Cold Start — Base Infrastructure
     runs-on: ubuntu-latest
+    environment: dev
 
     steps:
       - name: Checkout
