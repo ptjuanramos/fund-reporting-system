@@ -2,11 +2,12 @@ name: Cold Start — Base Infrastructure
 
 on:
   workflow_dispatch:
-    inputs:
-      apply:
-        description: "Run terraform apply (leave unchecked to plan only)"
-        type: boolean
-        default: false
+  push:
+    branches:
+      - main
+    paths:
+      - 'cold-start/**'
+      - '.github/workflows/cold-start-provision.yaml'
 
 permissions:
   contents: read
