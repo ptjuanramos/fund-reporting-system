@@ -1,26 +1,3 @@
-terraform {
-  required_version = ">= 1.5"
-
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.110"
-    }
-    databricks = {
-      source  = "databricks/databricks"
-      version = "~> 1.40"
-    }
-  }
-}
-
-provider "azurerm" {
-  features {}
-}
-
-provider "databricks" {
-  azure_workspace_resource_id = azurerm_databricks_workspace.main.id
-}
-
 data "azurerm_resource_group" "main" {
   name = var.resource_group_name
 }
