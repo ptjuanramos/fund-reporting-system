@@ -17,10 +17,9 @@ env:
   TF_WORKING_DIR: databricks-setup/terraform
   TF_VAR_resource_group_name: "fund-reporting-rg"
   TF_VAR_tf_state_storage_account_name: "fundreportingstracc"
-  ARM_USE_OIDC:        "true"
-  ARM_CLIENT_ID:       ${{ secrets.AZURE_CLIENT_ID }}
-  ARM_TENANT_ID:       ${{ secrets.AZURE_TENANT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  TF_VAR_arm_client_id:       ${{ secrets.AZURE_CLIENT_ID }}
+  TF_VAR_arm_tenant_id:       ${{ secrets.AZURE_TENANT_ID }}
+  TF_VAR_arm_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
 jobs:
   preflight:
@@ -83,11 +82,25 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init 
+        run: |
+          terraform init \
+            -backend-config="use_oidc=true" \
+            -backend-config="client_id=${{ secrets.AZURE_CLIENT_ID }}" \
+            -backend-config="tenant_id=${{ secrets.AZURE_TENANT_ID }}" \
+            -backend-config="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
       - name: Terraform Validate
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform validate
+
+      - name: Terraform Apply (workspace)
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -target=azurerm_databricks_workspace.main -auto-approve
+        env:
+          TF_VAR_location:       "northeurope"
+          TF_VAR_environment:    "dev"
+          TF_VAR_workspace_name: "fund-reporting-dbw"
+          TF_VAR_project_name:   "fund-reporting"
 
       - name: Get Databricks Azure AD token
         id: dbtoken
@@ -100,11 +113,11 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform apply -auto-approve
         env:
-          TF_VAR_location:                  "northeurope"
-          TF_VAR_environment:               "dev"
-          TF_VAR_workspace_name:            "fund-reporting-dbw"
-          TF_VAR_project_name:              "fund-reporting"
-          TF_VAR_databricks_azure_token:    ${{ steps.dbtoken.outputs.token }}
+          TF_VAR_location:               "northeurope"
+          TF_VAR_environment:            "dev"
+          TF_VAR_workspace_name:         "fund-reporting-dbw"
+          TF_VAR_project_name:           "fund-reporting"
+          TF_VAR_databricks_azure_token: ${{ steps.dbtoken.outputs.token }}
 
       - name: Show workspace URL
         working-directory: ${{ env.TF_WORKING_DIR }}
