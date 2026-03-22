@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - 'databricks-setup/**''
+      - 'databricks-setup/**'
       - '.github/workflows/provision-databricks.yaml'
 
 permissions:
