@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+
+  oracle-fund-db:
+    image: container-registry.oracle.com/database/free:latest
+    container_name: oracle-fund-db
+    restart: unless-stopped
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_PWD:           "${ORACLE_PWD:-FundAdmin#2024}"
+      ORACLE_CHARACTERSET:  AL32UTF8
+      ENABLE_ARCHIVELOG:    "true"
+      ENABLE_FORCE_LOGGING: "true"
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    networks:
+      - fund-net
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'SELECT 1 FROM dual;' | sqlplus -S sys/${ORACLE_PWD:-FundAdmin#2024}@FREE as sysdba | grep -q 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s    # Oracle takes ~2 min on first boot
+
+  db-init:
+    image: container-registry.oracle.com/database/free:latest
+    container_name: db-init
+    restart: "no"
+    environment:
+      ORACLE_PWD: "${ORACLE_PWD:-FundAdmin#2024}"
+    volumes:
+      - ./setup_oracle_fund_db.sh:/opt/scripts/setup_oracle_fund_db.sh:ro
+      - ./00_create_user.sql:/opt/scripts/00_create_user.sql:ro
+      - ./01_fund_reporting_schema.sql:/opt/scripts/01_fund_reporting_schema.sql:ro
+    networks:
+      - fund-net
+    depends_on:
+      oracle-fund-db:
+        condition: service_healthy
+    entrypoint: >
+      bash -c "
+        echo '[db-init] Waiting for Oracle listener on oracle-fund-db:1521...' &&
+        until echo 'SELECT 1 FROM dual;' | sqlplus -S sys/${ORACLE_PWD:-FundAdmin#2024}@//oracle-fund-db:1521/FREE 'as sysdba' 2>&1 | grep -q 1; do
+          echo '[db-init] Listener not ready yet, retrying in 5s...' &&
+          sleep 5;
+        done &&
+        echo '[db-init] Listener is up. Running setup script...' &&
+        bash /opt/scripts/setup_oracle_fund_db.sh &&
+        echo '[db-init] Setup complete.'
+      "
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok-oracle
+    restart: unless-stopped
+    command:
+      - "tcp"
+      - "oracle-fund-db:1521"
+    environment:
+      NGROK_AUTHTOKEN: "${NGROK_AUTHTOKEN}"
+    ports:
+      - "4040:4040" 
+    networks:
+      - fund-net
+    depends_on:
+      oracle-fund-db:
+        condition: service_healthy
+
+networks:
+  fund-net:
+    driver: bridge
+
+volumes:
+  oracle-data:
