@@ -1,9 +1,3 @@
--- ============================================================
--- 00_create_user.sql
--- Purpose : Create the fund_admin schema user inside FREEPDB1
--- Run as  : sys as sysdba  (via FREE CDB, then switch container)
--- Called  : automatically by setup_oracle_fund_db.sh
--- ============================================================
 WHENEVER SQLERROR EXIT SQL.SQLCODE
 
 -- Switch into the pluggable DB

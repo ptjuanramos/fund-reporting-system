@@ -1,0 +1,46 @@
+name: Cold Start — Base Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Run terraform apply (leave unchecked to plan only)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  TF_WORKING_DIR: cold-start/terraform
+
+jobs:
+  cold-start:
+    name: Cold Start — Base Infrastructure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.8"
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform validate
+
+      - name: Terraform Apply
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve
+        env:
+          TF_VAR_resource_group_name: "fund-reporting-rg"
+          TF_VAR_tf_state_storage_account_name: "fundreportingstracc"
+          TF_VAR_location:               "northeurope"
+          TF_VAR_environment:            "dev"
