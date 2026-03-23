@@ -74,7 +74,8 @@ resource "azurerm_storage_account" "bronze" {
 }
 
 resource "databricks_secret_scope" "storage" {
-  name = "storage"
+  name                     = "storage"
+  initial_manage_principal = "users"
 }
 
 resource "databricks_secret" "storage_key" {
