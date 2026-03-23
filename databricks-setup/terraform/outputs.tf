@@ -17,3 +17,18 @@ output "cluster_policy_id" {
   description = "ID of the cost-control cluster policy."
   value       = databricks_cluster_policy.cost_control.id
 }
+
+output "storage_account_name" {
+  description = "Paste into STORAGE_ACCOUNT in the notebook"
+  value       = azurerm_storage_account.bronze.name
+}
+
+output "container_name" {
+  description = "Paste into CONTAINER in the notebook"
+  value       = azurerm_storage_container.bronze.name
+}
+
+output "abfss_path" {
+  description = "Full ADLS Gen2 path"
+  value       = "abfss://${azurerm_storage_container.bronze.name}@${azurerm_storage_account.bronze.name}.dfs.core.windows.net/fund_reporting_bronze"
+}

@@ -48,6 +48,46 @@ resource "databricks_group_member" "admin" {
   member_id = databricks_user.admin.id
 }
 
+resource "random_string" "suffix" {
+  length  = 6
+  upper   = false
+  special = false
+}
+
+resource "azurerm_storage_account" "bronze" {
+  name                     = "fundreporting${random_string.suffix.result}"
+  resource_group_name      = data.azurerm_resource_group.main.name
+  location                 = data.azurerm_resource_group.main.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS" 
+
+  is_hns_enabled           = true
+
+  min_tls_version          = "TLS1_2"
+  allow_nested_items_to_be_public = false
+
+  tags = {
+    project     = var.project-name
+    environment = var.environment
+    managed_by  = "terraform"
+  }
+}
+
+resource "databricks_azure_blob_mount" "bronze" {
+  container_name         = azurerm_storage_container.bronze.name
+  storage_account_name   = azurerm_storage_account.bronze.name
+  mount_name             = "bronze"
+  auth_type              = "ACCESS_KEY"
+  token_secret_scope     = databricks_secret_scope.storage.name
+  token_secret_key       = databricks_secret.storage_key.key
+}
+
+resource "azurerm_storage_container" "bronze" {
+  name                  = "bronze"
+  storage_account_name  = azurerm_storage_account.bronze.name
+  container_access_type = "private"
+}
+
 locals {
   common_tags = {
     project     = var.project-name
