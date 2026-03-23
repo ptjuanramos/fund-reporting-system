@@ -97,11 +97,12 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform apply -target=azurerm_databricks_workspace.main -auto-approve
         env:
-          TF_VAR_location:         "northeurope"
-          TF_VAR_environment:      "dev"
-          TF_VAR_workspace_name:   "fund-reporting-dbw"
-          TF_VAR_project_name:     "fund-reporting"
-          TF_VAR_admin_user_email: ${{ secrets.DATABRICKS_ADMIN_EMAIL }}
+          TF_VAR_location:          "northeurope"
+          TF_VAR_environment:       "dev"
+          TF_VAR_workspace_name:    "fund-reporting-dbw"
+          TF_VAR_project_name:      "fund-reporting"
+          TF_VAR_admin_user_email:  ${{ secrets.DATABRICKS_ADMIN_EMAIL }}
+          TF_VAR_arm_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
 
       - name: Get Databricks Azure AD token
         id: dbtoken
@@ -120,6 +121,7 @@ jobs:
           TF_VAR_project_name:           "fund-reporting"
           TF_VAR_databricks_azure_token: ${{ steps.dbtoken.outputs.token }}
           TF_VAR_admin_user_email:       ${{ secrets.DATABRICKS_ADMIN_EMAIL }}
+          TF_VAR_arm_client_secret:      ${{ secrets.AZURE_CLIENT_SECRET }}
 
       - name: Show workspace URL
         working-directory: ${{ env.TF_WORKING_DIR }}

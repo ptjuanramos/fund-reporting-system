@@ -8,6 +8,10 @@ terraform {
       source  = "databricks/databricks"
       version = "~> 1.50"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
   }
 
   backend "azurerm" {
