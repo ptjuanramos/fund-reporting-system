@@ -73,30 +73,6 @@ resource "azurerm_storage_account" "bronze" {
   }
 }
 
-resource "databricks_secret_scope" "storage" {
-  name                     = "storage"
-  initial_manage_principal = "users"
-}
-
-resource "databricks_secret" "storage_key" {
-  key          = "sp-client-secret"
-  string_value = var.arm_client_secret
-  scope        = databricks_secret_scope.storage.name
-}
-
-resource "databricks_mount" "bronze" {
-  name = "bronze"
-
-  abfs {
-    storage_account_name = azurerm_storage_account.bronze.name
-    container_name       = azurerm_storage_container.bronze.name
-    tenant_id            = var.arm_tenant_id
-    client_id            = var.arm_client_id
-    client_secret_scope  = databricks_secret_scope.storage.name
-    client_secret_key    = databricks_secret.storage_key.key
-    initialize_file_system = true
-  }
-}
 
 resource "azurerm_storage_container" "bronze" {
   name                  = "bronze"
